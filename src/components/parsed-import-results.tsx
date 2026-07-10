@@ -53,6 +53,9 @@ function ParsedImportResults({ result }: { result: ImportResult }) {
             <Table className="min-w-max">
               <TableHeader className="bg-background sticky top-0 z-10 shadow-[0_1px_0_var(--border)]">
                 <TableRow className="hover:bg-background">
+                  <TableHead className="text-muted-foreground h-9 px-3 text-[11px] font-medium">
+                    Reason
+                  </TableHead>
                   {skippedColumns.map((column) => (
                     <TableHead
                       key={column}
@@ -66,6 +69,12 @@ function ParsedImportResults({ result }: { result: ImportResult }) {
               <TableBody>
                 {result.skippedRecords.map((record, rowIndex) => (
                   <TableRow key={`${record.sourceIndex}-${rowIndex}`}>
+                    <TableCell
+                      className="h-11 max-w-72 truncate px-3 text-[13px]"
+                      title={record.reason}
+                    >
+                      {record.reason}
+                    </TableCell>
                     {skippedColumns.map((column) => (
                       <TableCell
                         key={column}
