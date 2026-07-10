@@ -1,10 +1,11 @@
-import { createReadStream } from "node:fs";
 import { unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
-import { parse } from "csv-parse";
 import { Router } from "express";
 import multer from "multer";
+
+import { extractCrmRecords } from "@/server/ai/extract-crm-records";
+import { parseCsv } from "@/server/csv/parse-csv";
 
 export const importRouter = Router();
 
@@ -20,25 +21,20 @@ importRouter.post("/", upload.single("file"), async (req, res) => {
   }
 
   try {
-    const parser = createReadStream(req.file.path).pipe(
-      parse({
-        bom: true,
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
-      }),
-    );
+    const sourceRecords = await parseCsv({ filePath: req.file.path });
+    const { records, skippedRecords } = await extractCrmRecords({
+      sourceRecords,
+    });
 
-    let rowCount = 0;
-
-    for await (const record of parser) {
-      console.log("Parsed CSV record:", record);
-      rowCount += 1;
-    }
-
-    res.json({ message: "CSV parsed successfully", rowCount });
-  } catch {
-    res.status(400).json({ error: "Invalid CSV file" });
+    res.json({
+      records,
+      skippedRecords,
+      totalImported: records.length,
+      totalSkipped: skippedRecords.length,
+    });
+  } catch (error) {
+    console.error("CSV import failed:", error);
+    res.status(500).json({ error: "Could not extract CRM records" });
   } finally {
     await unlink(req.file.path).catch(() => undefined);
   }
