@@ -23,10 +23,6 @@ const useImportStore = create<ImportStore>()(
               ...(state.result?.skippedRecords ?? []),
               ...result.skippedRecords,
             ],
-            totalImported:
-              (state.result?.totalImported ?? 0) + result.totalImported,
-            totalSkipped:
-              (state.result?.totalSkipped ?? 0) + result.totalSkipped,
           },
         }));
       },

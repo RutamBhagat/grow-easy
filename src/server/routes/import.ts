@@ -26,8 +26,6 @@ importRouter.post("/", upload.single("file"), async (req, res) => {
     res.json({
       records,
       skippedRecords,
-      totalImported: records.length,
-      totalSkipped: skippedRecords.length,
     });
   } catch (error) {
     console.error("CSV import failed:", error);

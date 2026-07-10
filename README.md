@@ -76,8 +76,6 @@ curl -X POST -F "file=@public/sample.csv;type=text/csv" http://localhost:3000/ap
       },
       "reason": "No email or mobile number provided."
     }
-  ],
-  "totalImported": 3,
-  "totalSkipped": 1
+  ]
 }
 ```

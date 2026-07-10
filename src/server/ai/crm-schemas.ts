@@ -50,8 +50,6 @@ export const skippedRecordSchema = z.object({
 export const importResultSchema = z.object({
   records: z.array(crmRecordSchema),
   skippedRecords: z.array(skippedRecordSchema),
-  totalImported: z.number().int().nonnegative(),
-  totalSkipped: z.number().int().nonnegative(),
 });
 
 export type CrmRecord = z.infer<typeof crmRecordSchema>;

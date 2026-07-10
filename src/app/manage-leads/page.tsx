@@ -18,13 +18,13 @@ function ManageLeadsPage() {
               <div>
                 <dt className="text-xs text-muted-foreground">Total imported</dt>
                 <dd className="text-sm font-semibold tabular-nums">
-                  {result.totalImported}
+                  {result.records.length}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Total skipped</dt>
                 <dd className="text-sm font-semibold tabular-nums">
-                  {result.totalSkipped}
+                  {result.skippedRecords.length}
                 </dd>
               </div>
             </dl>
