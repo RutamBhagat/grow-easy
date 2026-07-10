@@ -1,10 +1,43 @@
-export default function ManageLeadsPage() {
+"use client";
+
+import { ParsedImportResults } from "@/components/parsed-import-results";
+import { Button } from "@/components/ui/button";
+import { useImportStore } from "@/stores/import-store";
+
+function ManageLeadsPage() {
+  const result = useImportStore((state) => state.result);
+  const reset = useImportStore((state) => state.reset);
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Manage Leads</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Import and manage your CRM leads.
-      </p>
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8">
+      <header className="mb-6 flex items-end justify-between gap-6">
+        <h1 className="text-xl font-semibold tracking-tight">Manage Leads</h1>
+        {result && (
+          <div className="flex items-center gap-5 pr-4 sm:pr-6">
+            <dl className="flex gap-6">
+              <div>
+                <dt className="text-xs text-muted-foreground">Total imported</dt>
+                <dd className="text-sm font-semibold tabular-nums">
+                  {result.totalImported}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Total skipped</dt>
+                <dd className="text-sm font-semibold tabular-nums">
+                  {result.totalSkipped}
+                </dd>
+              </div>
+            </dl>
+            <Button variant="outline" size="sm" onClick={reset}>
+              Reset
+            </Button>
+          </div>
+        )}
+      </header>
+
+      {result && <ParsedImportResults result={result} />}
     </div>
   );
 }
+
+export default ManageLeadsPage;

@@ -41,13 +41,24 @@ export const batchResultSchema = z.object({
   skip_reason: z.string(),
 });
 
+export const skippedRecordSchema = z.object({
+  sourceIndex: z.number().int(),
+  source: z.record(z.string()),
+  reason: z.string(),
+});
+
+export const importResultSchema = z.object({
+  records: z.array(crmRecordSchema),
+  skippedRecords: z.array(skippedRecordSchema),
+  totalImported: z.number().int().nonnegative(),
+  totalSkipped: z.number().int().nonnegative(),
+});
+
 export type CrmRecord = z.infer<typeof crmRecordSchema>;
 
-export type SkippedRecord = {
-  sourceIndex: number;
-  source: Record<string, string>;
-  reason: string;
-};
+export type SkippedRecord = z.infer<typeof skippedRecordSchema>;
+
+export type ImportResult = z.infer<typeof importResultSchema>;
 
 export type ExtractionResult = {
   records: CrmRecord[];

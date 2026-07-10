@@ -2,21 +2,55 @@
 
 import { useState } from "react";
 import { parse } from "csv-parse/browser/esm/sync";
+import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
 import { CsvFilePicker } from "@/components/csv-file-picker";
 import { CsvPreview, type CsvPreviewData } from "@/components/csv-preview";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { importResultSchema } from "@/server/ai/crm-schemas";
+import { useImportStore } from "@/stores/import-store";
 
 const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // vercel limit
 const PREVIEW_ROW_LIMIT = 100;
 
 function CsvDropZone() {
+  const router = useRouter();
+  const addImportResult = useImportStore((state) => state.addImportResult);
   const [file, setFile] = useState<File>();
   const [preview, setPreview] = useState<CsvPreviewData>();
   const [parseError, setParseError] = useState("");
   const [isParsing, setIsParsing] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  async function importCsv() {
+    if (!file) return;
+
+    setParseError("");
+    setIsImporting(true);
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+
+      const response = await fetch("/api/import", { method: "POST", body });
+      const result = importResultSchema.safeParse(await response.json());
+
+      if (!response.ok || !result.success) {
+        throw new Error("Could not import this CSV.");
+      }
+
+      addImportResult(result.data);
+      router.push("/manage-leads");
+    } catch (error) {
+      setParseError(
+        error instanceof Error ? error.message : "Could not import this CSV.",
+      );
+    } finally {
+      setIsImporting(false);
+    }
+  }
 
   async function previewCsv(nextFile: File) {
     setFile(nextFile);
@@ -117,11 +151,18 @@ function CsvDropZone() {
         </DialogClose>
         <Button
           className="h-12 w-full rounded-xl bg-[#ff9f88] text-base font-semibold text-white hover:bg-[#f58f76]"
-          disabled={!preview}
+          disabled={!preview || isImporting}
+          onClick={() => void importCsv()}
         >
-          Confirm import
+          {isImporting ? "Extracting leads…" : "Confirm import"}
         </Button>
       </DialogFooter>
+
+      {parseError && preview && (
+        <p role="alert" className="text-center text-xs text-destructive">
+          {parseError}
+        </p>
+      )}
     </>
   );
 }
