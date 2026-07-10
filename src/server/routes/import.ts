@@ -1,6 +1,3 @@
-import { unlink } from "node:fs/promises";
-import { tmpdir } from "node:os";
-
 import { Router } from "express";
 import multer from "multer";
 
@@ -10,7 +7,7 @@ import { parseCsv } from "@/server/csv/parse-csv";
 export const importRouter = Router();
 
 const upload = multer({
-  dest: tmpdir(),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 4.5 * 1024 * 1024 },
 });
 
@@ -21,7 +18,7 @@ importRouter.post("/", upload.single("file"), async (req, res) => {
   }
 
   try {
-    const sourceRecords = await parseCsv({ filePath: req.file.path });
+    const sourceRecords = await parseCsv({ buffer: req.file.buffer });
     const { records, skippedRecords } = await extractCrmRecords({
       sourceRecords,
     });
@@ -35,7 +32,5 @@ importRouter.post("/", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("CSV import failed:", error);
     res.status(500).json({ error: "Could not extract CRM records" });
-  } finally {
-    await unlink(req.file.path).catch(() => undefined);
   }
 });
