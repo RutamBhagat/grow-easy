@@ -29,7 +29,7 @@ export default function LeadSourcePage() {
             <UploadIcon />
             Import leads
           </DialogTrigger>
-          <DialogContent className="gap-6 p-6 sm:max-w-lg [&_[data-slot=dialog-close]]:top-4 [&_[data-slot=dialog-close]]:right-4">
+          <DialogContent className="max-h-[calc(100vh-2rem)] gap-6 overflow-y-auto p-6 sm:max-w-lg sm:has-[table]:max-w-6xl [&_[data-slot=dialog-close]]:top-4 [&_[data-slot=dialog-close]]:right-4">
             <DialogHeader>
               <DialogTitle className="text-xl">
                 Import leads via CSV
