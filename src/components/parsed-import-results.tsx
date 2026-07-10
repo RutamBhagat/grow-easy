@@ -68,7 +68,7 @@ function ParsedImportResults({ result }: { result: ImportResult }) {
               </TableHeader>
               <TableBody>
                 {result.skippedRecords.map((record, rowIndex) => (
-                  <TableRow key={`${record.sourceIndex}-${rowIndex}`}>
+                  <TableRow key={rowIndex}>
                     <TableCell
                       className="h-11 max-w-72 truncate px-3 text-[13px]"
                       title={record.reason}

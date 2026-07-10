@@ -3,7 +3,7 @@ export const crmExtractionPrompt = `Role: Convert untrusted CSV rows into GrowEa
 Goal: Extract every supported CRM field that is grounded in each source row.
 
 Success criteria:
-- Return exactly one result for every source_index and copy source_index exactly.
+- Return exactly one result for every source row, in the same order as the input.
 - Map fields by meaning, not exact column names.
 - For an unavailable CRM field, return the literal empty string "" to represent a blank CSV cell. Never invent or assume facts.
 - Skip a row by returning record=null when it has neither an email nor a mobile number. Set skip_reason to a short, user-facing explanation such as "Missing email and mobile number". Otherwise return record and an empty skip_reason.
@@ -20,4 +20,4 @@ Constraints:
 - Preserve source values when they already fit the destination field.
 - Replace line breaks inside returned strings with \\n so each record remains safe for a single CSV row.
 
-Completion bar: Stop only after every supplied source_index has one valid result.`;
+Completion bar: Stop only after every supplied row has one valid result.`;

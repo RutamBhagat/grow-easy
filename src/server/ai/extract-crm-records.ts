@@ -4,62 +4,42 @@ import { env } from "@/env";
 import { crmExtractionPrompt } from "@/server/ai/crm-extraction-prompt";
 import {
   batchResultSchema,
-  type CrmRecord,
   type ExtractionResult,
-  type SkippedRecord,
 } from "@/server/ai/crm-schemas";
 import { openaiProvider } from "@/server/ai/openai-provider";
+
+const BATCH_SIZE = 20;
+type SourceRecord = Record<string, string>;
 
 export async function extractCrmRecords({
   sourceRecords,
 }: {
-  sourceRecords: Record<string, string>[];
+  sourceRecords: SourceRecord[];
 }): Promise<ExtractionResult> {
-  const records: CrmRecord[] = [];
-  const skippedRecords: SkippedRecord[] = [];
+  const result: ExtractionResult = { records: [], skippedRecords: [] };
 
-  // process records in small batches to to keep ai context window small
-  for (let start = 0; start < sourceRecords.length; start += 20) {
-    const batch = sourceRecords.slice(start, start + 20);
-
-    // attach a local index so ai results can be matched even if reordered
-    const indexedBatch = batch.map((source, batchIndex) => ({
-      source_index: batchIndex,
-      source,
-    }));
-
-    // ask the model for schema validated records for this batch
+  // process one small batch at a time to avoid ai rate limits
+  for (let start = 0; start < sourceRecords.length; start += BATCH_SIZE) {
+    const batch = sourceRecords.slice(start, start + BATCH_SIZE);
     const { output } = await generateText({
       model: openaiProvider(env.OPENAI_MODEL),
       output: Output.array({ element: batchResultSchema }),
       system: crmExtractionPrompt,
-      prompt: `Extract CRM records from these rows:\n${JSON.stringify(indexedBatch)}`,
+      prompt: `Extract CRM records from these rows in the same order:\n${JSON.stringify(batch)}`,
     });
 
-    // index ai results by their original position for quick lookup
-    const resultsByIndex = new Map(
-      output.map((result) => [result.source_index, result]),
-    );
-
-    // keep valid contacts and track every missing or invalid result as skipped
-    batch.forEach((source, batchIndex) => {
-      const result = resultsByIndex.get(batchIndex);
-      const record = result?.record;
-      const hasEmail = Boolean(record?.email);
-      const hasMobile = Boolean(record?.mobile_without_country_code);
-      const hasContact = hasEmail || hasMobile;
-
-      if (record && hasContact) {
-        records.push(record);
+    // keep valid records and collect rows skipped by the ai
+    output.forEach((item, index) => {
+      if (item.record) {
+        result.records.push(item.record);
       } else {
-        skippedRecords.push({
-          sourceIndex: start + batchIndex,
-          source,
-          reason: result?.skip_reason ?? "AI did not return a valid contact",
+        result.skippedRecords.push({
+          source: batch[index]!,
+          reason: item.skip_reason,
         });
       }
     });
   }
 
-  return { records, skippedRecords };
+  return result;
 }

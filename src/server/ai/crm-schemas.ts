@@ -36,13 +36,11 @@ export const crmRecordSchema = z.object({
 });
 
 export const batchResultSchema = z.object({
-  source_index: z.number().int(),
   record: crmRecordSchema.nullable(),
   skip_reason: z.string(),
 });
 
 export const skippedRecordSchema = z.object({
-  sourceIndex: z.number().int(),
   source: z.record(z.string()),
   reason: z.string(),
 });
