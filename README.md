@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="./public/favicon.ico" alt="GrowEasy logo" width="72" height="72" />
   <h1>GrowEasy CSV Importer</h1>
   <p>Preview CSV files with any column layout, then use AI to transform confirmed rows into structured GrowEasy CRM leads.</p>
 </div>
