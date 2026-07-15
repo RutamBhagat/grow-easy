@@ -60,9 +60,6 @@ OPENAI_MODEL=your-model-name
 OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
-> [!IMPORTANT]
-> The configured model and provider must support structured outputs. Never commit the `.env` file or an API key.
-
 ### Run locally
 
 ```bash
