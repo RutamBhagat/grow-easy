@@ -8,6 +8,8 @@ import type { ImportResult } from "@/server/ai/crm-schemas";
 type ImportStore = {
   result: ImportResult | undefined;
   addImportResult: (result: ImportResult) => void;
+  deleteRecords: (indices: number[]) => void;
+  deleteSkippedRecords: (indices: number[]) => void;
   reset: () => void;
 };
 
@@ -23,6 +25,26 @@ const useImportStore = create<ImportStore>()(
               ...(state.result?.skippedRecords ?? []),
               ...result.skippedRecords,
             ],
+          },
+        }));
+      },
+      deleteRecords: (indices) => {
+        set((state) => ({
+          result: state.result && {
+            ...state.result,
+            records: state.result.records.filter(
+              (_record, recordIndex) => !indices.includes(recordIndex),
+            ),
+          },
+        }));
+      },
+      deleteSkippedRecords: (indices) => {
+        set((state) => ({
+          result: state.result && {
+            ...state.result,
+            skippedRecords: state.result.skippedRecords.filter(
+              (_record, recordIndex) => !indices.includes(recordIndex),
+            ),
           },
         }));
       },
